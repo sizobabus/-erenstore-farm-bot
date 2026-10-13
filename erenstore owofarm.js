@@ -31,7 +31,7 @@ const atasozleri = [
   "Güvenme sırtına, el kapısı başkadır."
 ];
 
-// YÜKSEK GÜVENLİKLİ CAPTCHA & 5/1 SAYAÇ KORUMASI
+// AKILLI VE KESİN CAPTCHA / 5/1 KORUMASI
 function checkSafety(message, clientUserId) {
   if (message.author.id !== '408785106942164992') return false;
 
@@ -42,22 +42,32 @@ function checkSafety(message, clientUserId) {
     return false;
   }
 
-  // Tehlike kelimeleri (5/1, 5/2, 5/3, 5/4, 5/5 Sayaçları Eksiksiz Geri Eklendi)
-  const dangerWords = [
-    "captcha", "verify", "macro", "banned", "block", 
-    "are you human", "dogrulama", "güvenlik", "please check",
-    "5/1", "5/2", "5/3", "5/4", "5/5"
-  ];
+  // Kullanıcı etiketlenmiş mi? (OwO uyarı atarken kesinlikle etiketler)
+  const isMentioned = message.mentions.users.has(clientUserId);
 
-  // Tam eşleşme ve kelime kontrolü
-  const hasDangerWord = dangerWords.some(word => content.includes(word));
+  // Kesin Captcha / Ban kelimeleri (Etiket olmasa bile kapatır)
+  const strictDangerWords = [
+    "captcha", "verify", "macro", "banned", "block", 
+    "are you human", "dogrulama", "güvenlik", "please check", "banned for"
+  ];
+  const hasStrictDanger = strictDangerWords.some(word => content.includes(word));
 
   // Verify butonu kontrolü
   const hasVerifyComponent = message.components && message.components.some(row => 
     row.components && row.components.some(comp => comp.label && comp.label.toLowerCase().includes('verify'))
   );
 
-  return hasDangerWord || hasVerifyComponent || content.includes('banned for');
+  // Sayaç Kontrolü (5/1, 5/2 vb.) -> SADECE KULLANICI ETİKETLENDİYSE VEYA CAPTCHA VARSA TETİKLENİR!
+  const counterWords = ["5/1", "5/2", "5/3", "5/4", "5/5"];
+  const hasCounter = counterWords.some(word => content.includes(word));
+
+  // 1. Kesin tehlike kelimesi veya buton varsa KAPAT
+  if (hasStrictDanger || hasVerifyComponent) return true;
+
+  // 2. Eğer 5/1 sayacı varsa VE kullanıcı etiketlenmişse (gerçek uyarı demektir) KAPAT
+  if (hasCounter && (isMentioned || content.includes('warning') || content.includes('check'))) return true;
+
+  return false;
 }
 
 configs.forEach((cfg, index) => {
@@ -94,12 +104,11 @@ configs.forEach((cfg, index) => {
       return;
     }
 
-    // AÇILIŞTA GEÇMİŞ KONTROLÜ (ZAMAN SÜZGEÇLİ)
+    // AÇILIŞTA GEÇMİŞ KONTROLÜ
     try {
       const recentMessages = await channel.messages.fetch({ limit: 5 });
       const now = Date.now();
 
-      // Sadece SON 3 DAKİKA (180.000 ms) içinde atılmış TEHLİKELİ mesajları arar
       const dangerMessage = recentMessages.find(msg => {
         const isDangerous = checkSafety(msg, client.user.id);
         const isRecent = (now - msg.createdTimestamp) < 180000;
@@ -108,7 +117,7 @@ configs.forEach((cfg, index) => {
 
       if (dangerMessage) {
         console.log(`\n==================================================`);
-        console.log(`🚨 [AÇILIŞ KORUMASI] KANALDA SON 3 DAKİKADA ATILMIŞ CAPTCHA VAR! 🚨`);
+        console.log(`🚨 [AÇILIŞ KORUMASI] KANALDA CAPTCHA YAKALANDI! 🚨`);
         console.log(`Mesaj: ${dangerMessage.content}`);
         console.log(`⚙️ HESABI KORUMAK İÇİN BOT BAŞLATILMADI!`);
         console.log(`==================================================\n`);
@@ -150,7 +159,7 @@ configs.forEach((cfg, index) => {
     }
   }
 
-  // ANLIK KONTROL (5/1 geldiği an yakalar)
+  // ANLIK KONTROL
   client.on('messageCreate', async (message) => {
     if (message.channel.id !== cfg.channelId) return;
 
@@ -159,7 +168,7 @@ configs.forEach((cfg, index) => {
       if (actionTimeout) clearTimeout(actionTimeout);
 
       console.log(`\n==================================================`);
-      console.log(`🚨 [ANLIK KORUMA] CAPTCHA / 5/1 UYARISI YAKALANDI! 🚨`);
+      console.log(`🚨 [ANLIK KORUMA] GERÇEK CAPTCHA / 5/1 UYARISI YAKALANDI! 🚨`);
       console.log(`Hesap: ${client.user.tag}`);
       console.log(`OwO Mesajı: ${message.content}`);
       console.log(`⚙️ HESABI KORUMAK İÇİN ANINDA KAPATILIYOR!`);
@@ -175,4 +184,4 @@ configs.forEach((cfg, index) => {
     console.log(`❌ [Hesap ${index + 1}] Giriş Başarısız: ${err.message}`);
   });
 });
-            
+    
