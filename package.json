@@ -1,0 +1,20 @@
+{
+  "name": "erenstore-owofarm",
+  "version": "1.0.0",
+  "description": "OwO Bot Otomasyon ve Gelişmiş Captcha Koruma Sistemi",
+  "main": "erenstore-owofarm.js",
+  "scripts": {
+    "start": "node erenstore-owofarm.js"
+  },
+  "keywords": [
+    "discord",
+    "selfbot",
+    "owo",
+    "farm"
+  ],
+  "author": "ŞİZO",
+  "license": "ISC",
+  "dependencies": {
+    "discord.js-selfbot-v13": "^2.15.0"
+  }
+}
