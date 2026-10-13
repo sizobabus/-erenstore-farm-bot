@@ -16,7 +16,7 @@ Bu bot, Discord üzerindeki **OwO botu** için özel olarak geliştirilmiş; **�
 
  🛠️ Kurulum ve Gereksinimler
 
-1. Bilgisayarınızda veya sunucunuzda (Termux / VPS / PC) **Node.js** kurulu olmalıdır.
+1. Bilgisayarınızda veya sunucunuzda  (VPS / PC) **Node.js** kurulu olmalıdır.
 2. Proje klasöründe bir terminal veya komut satırı açarak gerekli kütüphaneyi yükleyin:
 
 bash
