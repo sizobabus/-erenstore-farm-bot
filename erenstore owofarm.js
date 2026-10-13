@@ -31,7 +31,7 @@ const atasozleri = [
   "Güvenme sırtına, el kapısı başkadır."
 ];
 
-// Kesin Captcha / Ban Kontrolü (5/1, 5/2... anında yakalar, boss'ları eler)
+// YÜKSEK GÜVENLİKLİ CAPTCHA & 5/1 SAYAÇ KORUMASI
 function checkSafety(message, clientUserId) {
   if (message.author.id !== '408785106942164992') return false;
 
@@ -42,17 +42,17 @@ function checkSafety(message, clientUserId) {
     return false;
   }
 
-  const isMentioned = message.mentions.users.has(clientUserId);
-
-  // Tehlike kelimeleri (Sayaçlar dahil: 5/1, 5/2 vb.)
+  // Tehlike kelimeleri (5/1, 5/2, 5/3, 5/4, 5/5 Sayaçları Eksiksiz Geri Eklendi)
   const dangerWords = [
     "captcha", "verify", "macro", "banned", "block", 
-    "are you human", "dogrulama", "güvenlik", "5/1", "5/2", "5/3", "5/4", "5/5", "please check"
+    "are you human", "dogrulama", "güvenlik", "please check",
+    "5/1", "5/2", "5/3", "5/4", "5/5"
   ];
 
+  // Tam eşleşme ve kelime kontrolü
   const hasDangerWord = dangerWords.some(word => content.includes(word));
 
-  // Eğer mesajda Verify butonu veya bileşeni varsa ve içeriğinde captcha/verify uyarısı geçiyorsa tehlikedir
+  // Verify butonu kontrolü
   const hasVerifyComponent = message.components && message.components.some(row => 
     row.components && row.components.some(comp => comp.label && comp.label.toLowerCase().includes('verify'))
   );
@@ -102,7 +102,7 @@ configs.forEach((cfg, index) => {
       // Sadece SON 3 DAKİKA (180.000 ms) içinde atılmış TEHLİKELİ mesajları arar
       const dangerMessage = recentMessages.find(msg => {
         const isDangerous = checkSafety(msg, client.user.id);
-        const isRecent = (now - msg.createdTimestamp) < 180000; // 3 dakikadan yeni mi?
+        const isRecent = (now - msg.createdTimestamp) < 180000;
         return isDangerous && isRecent;
       });
 
@@ -175,4 +175,4 @@ configs.forEach((cfg, index) => {
     console.log(`❌ [Hesap ${index + 1}] Giriş Başarısız: ${err.message}`);
   });
 });
-              
+            
